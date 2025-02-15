@@ -3,11 +3,12 @@ import { fastifyCors } from "@fastify/cors";
 import {
 	validatorCompiler,
 	serializerCompiler,
+	type ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import { routes } from "./routes/routes";
 const app = fastify({
 	logger: true,
-});
+}).withTypeProvider<ZodTypeProvider>();
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);

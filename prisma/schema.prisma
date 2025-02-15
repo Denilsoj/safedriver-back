@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+    Ativo
+    Inativo
+}
+
+model Driver {
+    cpf String @db.VarChar(14) @id
+    name String 
+    date_birth DateTime
+    telephone String?
+    email String
+    status UserStatus @default(Ativo)
+    src_cnh String
+    src_crlv String
+    address Address?
+}
+
+model Address {
+    id Int @id @default(autoincrement())
+    street String
+    city String
+    state String
+    number String
+    zip_code String
+    driver Driver @relation(fields: [driver_cpf], references: [cpf])
+    driver_cpf String @unique
+}

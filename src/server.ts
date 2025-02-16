@@ -7,10 +7,11 @@ import {
 } from "fastify-type-provider-zod";
 import { routes } from "./routes/routes";
 import errorHandler from "./errors/errorHandler";
+import fastifyMultipar from "@fastify/multipart";
 const app = fastify({
 	logger: true,
 }).withTypeProvider<ZodTypeProvider>();
-
+app.register(fastifyMultipar);
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 app.register(fastifyCors, { origin: "*" });

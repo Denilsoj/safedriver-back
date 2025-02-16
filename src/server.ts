@@ -6,6 +6,7 @@ import {
 	type ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import { routes } from "./routes/routes";
+import errorHandler from "./errors/errorHandler";
 const app = fastify({
 	logger: true,
 }).withTypeProvider<ZodTypeProvider>();
@@ -14,6 +15,7 @@ app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 app.register(fastifyCors, { origin: "*" });
 app.register(routes);
+app.setErrorHandler(errorHandler);
 
 const server = async () => {
 	try {

@@ -24,6 +24,19 @@ class DriverServices {
 			throw error;
 		}
 	}
+
+	async getAll() {
+		try {
+			const drivers = await prisma.driver.findMany({
+				include: { address: true },
+			});
+
+			return drivers;
+		} catch (error) {
+			// biome-ignore lint/complexity/noUselessCatch: <explanation>
+			throw error;
+		}
+	}
 }
 
 export default new DriverServices();

@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import DriverServices from "../services/DriverRepository";
+import DriverServices from "../services/DriverServices";
 import { DriverSchema } from "../models/DriverModel";
 import { generateUniqueFilename } from "../utils/helpers";
 import { FileSchema } from "../models/FilesModel";

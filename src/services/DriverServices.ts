@@ -37,6 +37,22 @@ class DriverServices {
 			throw error;
 		}
 	}
+	async getDriverBy(cpf: string) {
+		try {
+			const driver = await prisma.driver.findUnique({
+				where: {
+					cpf: cpf,
+				},
+				include: {
+					address: true,
+				},
+			});
+			return driver ? driver : "Motorista não cadastrado";
+		} catch (error) {
+			// biome-ignore lint/complexity/noUselessCatch: <explanation>
+			throw error;
+		}
+	}
 }
 
 export default new DriverServices();

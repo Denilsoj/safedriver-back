@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isAdult } from "../utils/helpers";
-import { AddressSchema } from "./AddresModel";
+import { AddressSchema } from "./AddressModel";
 
 export const DriverSchema = z.object({
 	cpf: z

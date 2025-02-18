@@ -1,4 +1,4 @@
 import type { z } from "zod";
-import type { createDriverSchema } from "../schemas/driver";
+import type { DriverSchema } from "../models/DriverModel";
 
-export type ReqDriverBodyStore = z.infer<typeof createDriverSchema>;
+export type Driver = z.infer<typeof DriverSchema>;

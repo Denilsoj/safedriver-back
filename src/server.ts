@@ -11,7 +11,9 @@ import fastifyMultipar from "@fastify/multipart";
 const app = fastify({
 	logger: true,
 }).withTypeProvider<ZodTypeProvider>();
-app.register(fastifyMultipar);
+app.register(fastifyMultipar, {
+	limits: { fileSize: 12 * 1024 * 1024, files: 2, fields: 7 },
+});
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 app.register(fastifyCors, { origin: "*" });

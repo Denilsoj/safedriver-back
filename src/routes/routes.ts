@@ -1,16 +1,8 @@
 import DriverController from "../controllers/DriverController";
 import type { FastifyTypedInstance } from "../types/global";
-import { createDriverSchema } from "../schemas/driver";
-
+import { CreateDriverSchema } from "../models/DriverModel";
+import { z } from "zod";
 export async function routes(app: FastifyTypedInstance) {
 	app.get("/driver", DriverController.show);
-	app.post(
-		"/driver",
-		{
-			schema: {
-				body: createDriverSchema,
-			},
-		},
-		DriverController.store,
-	);
+	app.post("/driver", DriverController.store);
 }

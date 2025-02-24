@@ -1,5 +1,5 @@
 import { prisma } from "../database/connection";
-import type { Driver } from "../types/driver";
+import type { Driver, DriverUpdate } from "../types/driver";
 
 class DriverServices {
 	async create(driverData: Driver) {
@@ -47,7 +47,36 @@ class DriverServices {
 					address: true,
 				},
 			});
-			return driver ? driver : "Motorista não cadastrado";
+			return driver || {};
+		} catch (error) {
+			// biome-ignore lint/complexity/noUselessCatch: <explanation>
+			throw error;
+		}
+	}
+	async update(driverData: DriverUpdate, cpf_driver: string) {
+		try {
+			const updateDriver = await prisma.driver.update({
+				where: {
+					cpf: cpf_driver,
+				},
+				data: {
+					name: driverData.name,
+					date_birth: new Date(
+						typeof driverData.date_birth === "string"
+							? driverData.date_birth
+							: "",
+					),
+					email: driverData.email,
+					status: driverData.status,
+					src_cnh: driverData.src_cnh,
+					src_crlv: driverData.src_crlv,
+					telephone: driverData.telephone,
+					address: {
+						update: driverData.address,
+					},
+				},
+			});
+			return updateDriver;
 		} catch (error) {
 			// biome-ignore lint/complexity/noUselessCatch: <explanation>
 			throw error;

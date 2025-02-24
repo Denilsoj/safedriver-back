@@ -8,6 +8,9 @@ import {
 import { routes } from "./routes/routes";
 import errorHandler from "./errors/errorHandler";
 import fastifyMultipar from "@fastify/multipart";
+import { verifyBuncketExist } from "./services/MinioClient";
+import "dotenv/config";
+
 const app = fastify({
 	logger: true,
 }).withTypeProvider<ZodTypeProvider>();
@@ -24,6 +27,7 @@ const server = async () => {
 	try {
 		await app.listen({ port: 8080 });
 		console.log("Server listening on http://localhost:8080");
+		verifyBuncketExist(process.env.bucket_name as string);
 	} catch (err) {
 		app.log.error(err);
 		process.exit(1);

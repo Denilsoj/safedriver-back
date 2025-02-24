@@ -47,7 +47,6 @@ class DriverController {
 					});
 					const filepath = `${process.env.minio_api_endpoint}${process.env.bucket_name}/${filename}`;
 
-					// console.log(filepath);
 					filesInfo.push({
 						filename: filename,
 						fieldname: part.fieldname,
@@ -81,9 +80,9 @@ class DriverController {
 			const dataValidation = DriverSchema.parse(fields);
 			const driver = await DriverServices.create(dataValidation);
 
-			return reply.status(201).send(driver);
+			return reply.status(201).send();
 		} catch (e) {
-			return reply.send(e);
+			return reply.status(400).send(e);
 		}
 	}
 
@@ -137,7 +136,7 @@ class DriverController {
 			const dataValidation = DriverSchemaUpdated.parse(fields);
 			const driver = DriverServices.update(dataValidation, cpf);
 
-			reply.status(200).send(driver);
+			reply.status(200).send();
 		} catch (error) {
 			reply.status(400).send(error);
 		}

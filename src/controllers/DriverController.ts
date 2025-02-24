@@ -86,6 +86,62 @@ class DriverController {
 			return reply.send(e);
 		}
 	}
+
+	async update(
+		req: FastifyRequest<{ Params: { cpf: string } }>,
+		reply: FastifyReply,
+	) {
+		try {
+			const bucketName = process.env.bucket_name as string;
+			const fields: Record<string, unknown> = {};
+			const files = [];
+			const parts = await req.parts();
+			const { cpf } = req.params;
+			for await (const part of parts) {
+				if (part.type === "file") {
+					const filename = generateUniqueFilename(
+						part.fieldname,
+						part.filename,
+						fields.name,
+					);
+					const filepath = `${process.env.minio_api_endpoint}${process.env.bucket_name}/${filename}`;
+					const buffer = await part.toBuffer();
+					files.push({
+						filename: filename,
+						fieldname: part.fieldname,
+						filepath: filepath,
+						size: buffer.byteLength,
+					});
+					await sendImageBucket(
+						bucketName,
+						filename,
+						buffer,
+						buffer.byteLength,
+						part.mimetype,
+					);
+				}
+
+				if (part.type === "field") {
+					if (part.fieldname === "address") {
+						if (typeof part.value === "string") {
+							fields[part.fieldname] = JSON.parse(part.value);
+						}
+					} else if (part.fieldname !== "address") {
+						fields[part.fieldname] = part.value;
+					}
+				}
+			}
+			for (const file of files) {
+				fields[file.fieldname] = file.filepath;
+			}
+			const dataValidation = DriverSchemaUpdated.parse(fields);
+			const driver = DriverServices.update(dataValidation, cpf);
+
+			reply.status(200).send(driver);
+		} catch (error) {
+			reply.status(400).send(error);
+		}
+	}
 }
 
 export default new DriverController();

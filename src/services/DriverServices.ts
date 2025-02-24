@@ -13,6 +13,7 @@ class DriverServices {
 					status: driverData.status,
 					src_cnh: driverData.src_cnh,
 					src_crlv: driverData.src_crlv,
+					telephone: driverData?.telephone,
 					address: {
 						create: driverData.address,
 					},

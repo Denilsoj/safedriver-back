@@ -1,42 +1,37 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import DriverServices from "../services/DriverServices";
-import { DriverSchema } from "../models/DriverModel";
+import { DriverSchema, DriverSchemaUpdated } from "../models/DriverModel";
 import { generateUniqueFilename } from "../utils/helpers";
 import { FileSchema } from "../models/FilesModel";
-import { join } from "node:path";
-import { existsSync, mkdirSync } from "node:fs";
+import { sendImageBucket } from "../services/MinioClient";
+
 class DriverController {
 	async show(req: FastifyRequest, reply: FastifyReply) {
-		reply.send([]);
+		try {
+			const drivers = await DriverServices.getAll();
+			reply.status(200).send(drivers);
+		} catch (error) {
+			error;
+		}
 	}
+	async index(
+		req: FastifyRequest<{ Params: { cpf: string } }>,
+		reply: FastifyReply,
+	) {
+		const { cpf } = req.params;
+		console.log(cpf);
+		const driver = await DriverServices.getDriverBy(cpf);
 
+		return reply.status(200).send(driver);
+	}
 	async store(req: FastifyRequest, reply: FastifyReply) {
 		try {
-			const PATHFILES = join(process.cwd(), "upload");
-			const MAXFILES = 2;
-			let chekoutFiles = 0;
-			if (!existsSync(PATHFILES)) {
-				try {
-					mkdirSync(PATHFILES, { recursive: true });
-					console.log(`INFO:. Upload directory created in: ${PATHFILES}`);
-				} catch (error) {
-					console.log(`ERROR:. Error creating upload directory: ${PATHFILES}`);
-				}
-			}
-			const filesProcess = [];
+			const bucketName = process.env.bucket_name as string;
+
 			const fields: Record<string, unknown> = {};
 			const filesInfo = [];
 			for await (const part of req.parts()) {
 				if (part.type === "file") {
-					if (chekoutFiles > MAXFILES) {
-						return reply.status(400).send({
-							error: "Too many files",
-							message: `You can upload a maximum of ${MAXFILES} files.`,
-						});
-					}
-					chekoutFiles++;
-
-					filesProcess.push(part);
 					const filename = generateUniqueFilename(
 						part.fieldname,
 						part.filename,
@@ -50,17 +45,23 @@ class DriverController {
 						mimetype: part.mimetype,
 						size: buffer.byteLength,
 					});
+					const filepath = `${process.env.minio_api_endpoint}${process.env.bucket_name}/${filename}`;
 
-					const filepath = join(PATHFILES, filename);
-
+					// console.log(filepath);
 					filesInfo.push({
 						filename: filename,
 						fieldname: part.fieldname,
 						filepath: filepath,
 						size: buffer.byteLength,
 					});
-					chekoutFiles++;
-					await Bun.write(filepath, buffer);
+
+					await sendImageBucket(
+						bucketName,
+						filename,
+						buffer,
+						buffer.byteLength,
+						part.mimetype,
+					);
 				}
 
 				if (part.type === "field") {
@@ -78,9 +79,9 @@ class DriverController {
 			}
 
 			const dataValidation = DriverSchema.parse(fields);
-			const user = await DriverServices.create(dataValidation);
+			const driver = await DriverServices.create(dataValidation);
 
-			return reply.status(201).send();
+			return reply.status(201).send(driver);
 		} catch (e) {
 			return reply.send(e);
 		}

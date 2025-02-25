@@ -2,7 +2,7 @@ import { Client } from "minio";
 import "dotenv/config";
 
 export const minioClient = new Client({
-	endPoint: "localhost",
+	endPoint: process.env.minio_host as string,
 	port: 9000,
 	useSSL: false,
 	accessKey: process.env.access_key,
